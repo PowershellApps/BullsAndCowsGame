@@ -76,3 +76,5 @@ function Enter-BullsAndCowsGame($numberLength = 4, [switch] $hideHeader = $false
         else {"`t`t $r"}
     }
 }
+
+Export-ModuleMember -Function Enter-BullsAndCowsGame
