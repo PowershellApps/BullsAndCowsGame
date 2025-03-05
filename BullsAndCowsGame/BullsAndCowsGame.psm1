@@ -24,7 +24,7 @@
    Enter-BullsAndCowsGame -hideBanner -numberLength 3
 #>
 
-function Test-StringsMatch($s,$g)
+function Test-StringsMatch([string]$s, [string]$g)
 {
     $r=''
     $numberLength=$s.Length
@@ -32,28 +32,81 @@ function Test-StringsMatch($s,$g)
     {
         throw 'Length mismatch'
     }
-    $i=0;while($i -lt $numberLength){if($g[$i] -eq $s[$i]){$r+='B';$s=$s.remove($i,1);$g=$g.remove($i,1);$numberLength--}else{$i++}}
 
-    $i=0;while($i -lt $numberLength){if($s.contains($g[$i])){$r+='C';$s=$s.remove($s.IndexOf($g[$i]),1);$g=$g.remove($i,1);$numberLength--}else{$i++}}
-    $r
+    $i=0;
+    while($i -lt $numberLength)
+    {
+        if($g[$i] -eq $s[$i])
+        {
+            $r+='B';
+            $s=$s.remove($i,1);
+            $g=$g.remove($i,1);
+            $numberLength--
+        }
+        else
+        {
+            $i++
+        }
+    }
+
+    $i=0;
+    while($i -lt $numberLength)
+    {
+        if($s.contains($g[$i]))
+        {
+            $r+='C';
+            $s=$s.remove($s.IndexOf($g[$i]),1);
+            $g=$g.remove($i,1);
+            $numberLength--
+        }
+        else
+        {
+            $i++
+        }
+    }
+
+    return $r
 }
 
 function Get-SecretNumber($numberLength)
 {
-    $na=Get-Random -Count $numberLength -InputObject $(0..9)
+    $max = 9;
+    if ($numberLength -gt 10)
+    {
+        $max = $numberLength
+    }
+
+    $na=Get-Random -Count $numberLength -InputObject $(0..$max)
     $s = $na -join ''
-    $s
+    return $s
 }
 
-function Enter-BullsAndCowsGame($numberLength = 4, [switch] $hideHeader = $false)
+function Enter-BullsAndCowsGame([byte]$numberLength = 4, [switch] $hideHeader = $false)
 {
+    if ($numberLength -eq 0)
+    {
+        $s = read-host "You specified numberLength of 0, please manually enter number to guess, this will also clear the screen once you press <Enter>"
+        cls
+        $numberLength = $s.Length
+    }
+    else
+    {
+        $s=Get-SecretNumber $numberLength
+    }
+
+    $nonRepeating = ''
+    if ($numberLength -le 10)
+    {
+        $nonRepeating = ' non-repeating'
+    }
+
     if (!$hideHeader)
     {
         "Welcome to 'Bulls & Cows'! The classic number guessing game."
         "More info on https://github.com/PowershellApps/BullsAndCowsGame"
-        "Guess a sequence of $numberLength non-repeating digits. Enter 'x' to exit."
+        "Guess a sequence of $numberLength$nonRepeating digits. Enter 'x' to exit."
     }
-    $s=Get-SecretNumber $numberLength
+    
     $gameOn=$true
     $n=0
     while ($gameOn)
@@ -72,9 +125,12 @@ function Enter-BullsAndCowsGame($numberLength = 4, [switch] $hideHeader = $false
         }
 
         $r=Test-StringsMatch $s $g
-        if ($r -eq 'BBBB') {"Found after $n guesses, congrats!";$gameOn=$false}
-        else {"`t`t $r"}
+        "`t`t $r"
+        if ($r -eq 'BBBB')
+        {
+            "Found after $n guesses, congrats!";
+            $gameOn=$false
+        }
     }
 }
 
-Export-ModuleMember -Function Enter-BullsAndCowsGame
