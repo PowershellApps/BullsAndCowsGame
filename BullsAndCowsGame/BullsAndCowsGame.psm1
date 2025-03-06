@@ -12,7 +12,7 @@
   If specified, hides the initial header showing game introduction.
 
  .Example
-   # Start a game with default length of 4 for the secret number and generic game introduction.
+   # Start a game with default length of 4 for the secret number and default generic game introduction.
    Enter-BullsAndCowsGame
 
  .Example
@@ -22,6 +22,9 @@
  .Example
    # Start a game with length 3 for the secret number and hide generic game introduction.
    Enter-BullsAndCowsGame -hideBanner -numberLength 3
+ .Example
+   # Start a game with a custom secret by specifying length 0 for the secret number.
+   Enter-BullsAndCowsGame -numberLength 0
 #>
 
 function Test-StringsMatch([string]$s, [string]$g)
@@ -126,7 +129,7 @@ function Enter-BullsAndCowsGame([byte]$numberLength = 4, [switch] $hideHeader = 
 
         $r=Test-StringsMatch $s $g
         "`t`t $r"
-        if ($r -eq 'BBBB')
+        if ($r.Length -eq $numberLength -and $r.IndexOf('C') -eq -1)
         {
             "Found after $n guesses, congrats!";
             $gameOn=$false
